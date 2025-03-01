@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced RSA Calculator</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #00d4ff;
+        }
+        .section {
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #00d4ff;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: #333;
+            color: #fff;
+        }
+        button {
+            background: #00d4ff;
+            color: #000;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #00a3cc;
+        }
+    </style>
+    <script>
+        function mod(m, n) {
+            return ((m % n) + n) % n;
+        }
+
+        function ComputeNr(form) {
+            let p = parseInt(form.p.value);
+            let q = parseInt(form.q.value);
+            if (isNaN(p) || isNaN(q) || p <= 1 || q <= 1) {
+                alert("Please enter valid prime numbers for p and q.");
+                return;
+            }
+            form.N.value = p * q;
+            let r = (p - 1) * (q - 1);
+            form.r.value = r;
+            form.ed.value = Candidates(r);
+        }
+
+        function Candidates(r) {
+            let temp = "";
+            for (let i = 1; i <= 30; i++) {
+                temp += (1 + i * r) + " ";
+            }
+            return temp;
+        }
+
+        function Factorize(n) {
+            let factors = [];
+            for (let i = 2; i <= n; i++) {
+                while (n % i === 0) {
+                    factors.push(i);
+                    n /= i;
+                }
+            }
+            return factors.length ? factors.join(" * ") : "Prime";
+        }
+
+        function ComputeED(form) {
+            let k = parseInt(form.K.value);
+            if (isNaN(k) || k <= 1) {
+                alert("Please enter a valid number for K.");
+                return;
+            }
+            form.factors.value = Factorize(k);
+        }
+
+        function CheckED(form) {
+            let e = parseInt(form.e.value);
+            let d = parseInt(form.d.value);
+            let r = parseInt(form.r.value);
+            if (isNaN(e) || isNaN(d) || isNaN(r)) {
+                alert("Please enter valid values for e, d, and r.");
+                return;
+            }
+            let check = `e * d mod r = ${mod(e * d, r)}`;
+            form.checker.value = check;
+        }
+
+        function CheckCode(form) {
+            let e = parseInt(form.e.value);
+            let d = parseInt(form.d.value);
+            let N = parseInt(form.N.value);
+            let M = parseInt(form.Msg.value);
+            if (isNaN(e) || isNaN(d) || isNaN(N) || isNaN(M)) {
+                alert("Please enter valid values for encoding/decoding.");
+                return;
+            }
+            form.Cipher.value = mod(Math.pow(M, e), N);
+            form.Decipher.value = mod(Math.pow(form.Cipher.value, d), N);
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced RSA Calculator</h1>
+        <form>
+            <div class="section">
+                <h2>Step 1: Compute N</h2>
+                <label>p: <input type="text" name="p"></label>
+                <label>q: <input type="text" name="q"></label>
+                <button type="button" onclick="ComputeNr(this.form)">Set p, q</button>
+                <label>N = p*q: <input type="text" name="N" readonly></label>
+                <label>r = (p-1)*(q-1): <input type="text" name="r" readonly></label>
+                <label>Candidates (1 mod r): <textarea name="ed" rows="2" readonly></textarea></label>
+            </div>
+            <div class="section">
+                <h2>Step 2: Factorization</h2>
+                <label>K: <input type="text" name="K"></label>
+                <button type="button" onclick="ComputeED(this.form)">Factor K</button>
+                <label>Factors of K: <input type="text" name="factors" readonly></label>
+            </div>
+            <div class="section">
+                <h2>Step 3: Find e and d</h2>
+                <label>e: <input type="text" name="e"></label>
+                <label>d: <input type="text" name="d"></label>
+                <button type="button" onclick="CheckED(this.form)">Check e & d</button>
+                <label>Consistency Check: <textarea name="checker" rows="2" readonly></textarea></label>
+            </div>
+            <div class="section">
+                <h2>Step 4: Encode & Decode</h2>
+                <label>Msg: <input type="text" name="Msg"></label>
+                <button type="button" onclick="CheckCode(this.form)">Encode/Decode</button>
+                <label>Encrypted: <input type="text" name="Cipher" readonly></label>
+                <label>Decrypted: <input type="text" name="Decipher" readonly></label>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
